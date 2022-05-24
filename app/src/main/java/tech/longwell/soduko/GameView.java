@@ -28,7 +28,9 @@ public class GameView extends View {
     private Paint gridPaint;
     private Paint gridSquarePaint;
     private Paint numPaint;
+    private Paint numPaintHighlighted;
     private Paint pencilPaint;
+    private Paint pencilPaintHighlighted;
 
     private PointF tapPoint;
 
@@ -44,19 +46,19 @@ public class GameView extends View {
         // cell highlighting
         connectedHighlightPaint = new Paint();
         connectedHighlightPaint.setAntiAlias(true);
-        connectedHighlightPaint.setColor(Color.rgb(69, 69, 69));
+        connectedHighlightPaint.setColor(Color.rgb(24, 33, 24));
         connectedHighlightPaint.setStyle(Paint.Style.FILL);
 
         // the small grid lines
         gridPaint = new Paint();
         gridPaint.setAntiAlias(true);
-        gridPaint.setColor(Color.rgb(45, 45, 45));
+        gridPaint.setColor(Color.rgb(69, 69, 69));
         gridPaint.setStyle(Paint.Style.STROKE);
 
         // the big grid lines
         gridSquarePaint = new Paint();
         gridSquarePaint.setAntiAlias(true);
-        gridSquarePaint.setColor(Color.rgb(69, 69, 69));
+        gridSquarePaint.setColor(Color.rgb(102, 102, 102));
         gridSquarePaint.setStyle(Paint.Style.STROKE);
         gridSquarePaint.setStrokeWidth(5);
 
@@ -68,6 +70,10 @@ public class GameView extends View {
         numPaint.setTextSize(70);
         numPaint.setTextAlign(Paint.Align.CENTER);
 
+        // highlighted big numbers
+        numPaintHighlighted = new Paint(numPaint);
+        numPaintHighlighted.setColor(Color.rgb(255, 255, 0));
+
         // small penciled in numbers
         pencilPaint = new Paint();
         pencilPaint.setAntiAlias(true);
@@ -75,6 +81,10 @@ public class GameView extends View {
         pencilPaint.setColor(Color.rgb(180, 180, 180));
         pencilPaint.setTextSize(30);
         pencilPaint.setTextAlign(Paint.Align.CENTER);
+
+        // highlighted small numbers
+        pencilPaintHighlighted = new Paint(pencilPaint);
+        pencilPaintHighlighted.setColor(Color.rgb(255, 255, 0));
 
         tapPoint = new PointF(-1, -1);
 
@@ -135,19 +145,47 @@ public class GameView extends View {
         }
     }
 
+    private Optional<Cell> getTappedCell(Canvas canvas) {
+        Optional<Cell> tappedCell = Optional.empty();
+
+        if (tapPoint.x >= 0 && tapPoint.x <= canvas.getWidth() && tapPoint.y >= 0 && tapPoint.y <= canvas.getWidth()) {
+            List<Integer> coords = board.convertCanvasPixelsToCoords(canvas, tapPoint.x, tapPoint.y);
+            tappedCell = Optional.of(board.getCell(coords.get(0), coords.get(1)));
+        }
+
+        return tappedCell;
+    }
+
     private void drawCells(Canvas canvas) {
+//        Optional<Cell> selectedCell = Optional.
+//
+//                board.getCells().stream().filter(cell -> cell.getNum().g)
+//
+
+
+
+
         for (Cell cell : board.getCells()) {
             if (cell.getNum().isPresent()) {
                 List<Float> coords = cell.getCenterOnCanvas(canvas);
+                Paint paint = getTappedCell(canvas).map(Cell::getNum).orElse(Optional.of(-1)).orElse(-1) == cell.getNum().orElse(-2)
+                    ? numPaintHighlighted
+                    : numPaint;
+
                 float x = coords.get(0);
-                float y = coords.get(1) - ((numPaint.descent() + numPaint.ascent()) / 2);
-                canvas.drawText(cell.getNum().get().toString(), x, y, numPaint);
+                float y = coords.get(1) - ((paint.descent() + paint.ascent()) / 2);
+                canvas.drawText(cell.getNum().get().toString(), x, y, paint);
             } else {
                 for (int penciledNum : cell.getPenciledNums()) {
                     List<Float> penciledCoords = cell.getPenciledNumCenterOnCanvas(canvas, penciledNum);
+
+                    Paint paint = getTappedCell(canvas).map(Cell::getNum).orElse(Optional.of(-1)).orElse(-1) == penciledNum
+                            ? pencilPaintHighlighted
+                            : pencilPaint;
+
                     float penciledX = penciledCoords.get(0);
-                    float penciledY = penciledCoords.get(1) - ((pencilPaint.descent() + pencilPaint.ascent()) / 2);
-                    canvas.drawText(String.valueOf(penciledNum), penciledX, penciledY, pencilPaint);
+                    float penciledY = penciledCoords.get(1) - ((paint.descent() + paint.ascent()) / 2);
+                    canvas.drawText(String.valueOf(penciledNum), penciledX, penciledY, paint);
                 }
             }
         }

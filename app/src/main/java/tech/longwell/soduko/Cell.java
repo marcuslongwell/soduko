@@ -80,7 +80,12 @@ public class Cell {
         this.row = row;
         this.col = col;
         this.isEditable = true;
-        this.num = Optional.empty();
+//        this.num = Optional.empty();
+
+        this.num = (int)((Math.random() * (3 - 1) + 1)) == 1
+                ? Optional.of((int)((Math.random() * (10 - 1)) + 1))
+                : Optional.empty();
+
         this.penciledNums = List.of(1, 4, 5, 8, 9);
     }
 

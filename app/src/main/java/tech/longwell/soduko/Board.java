@@ -13,6 +13,23 @@ import java.util.stream.Collectors;
 public class Board {
     private List<Cell> cells;
 
+    public Board() {
+        this.cells = new ArrayList<>();
+
+        int row = 0;
+        int col = 0;
+        for (int i = 0; i <= 81; i++) {
+            cells.add(new Cell(row, col));
+
+            col++;
+
+            if (i % 9 == 0 && i != 0) {
+                row++;
+                col = 0;
+            }
+        }
+    }
+
     public List<Cell> getCellsInSquare(int square) {
         return getCells().stream().filter(cell -> cell.getSquare() == square).collect(Collectors.toList());
     }
@@ -125,23 +142,6 @@ public class Board {
         final int bottom = top + (int)squareHeight;
 
         return new Rect(left, top, right, bottom);
-    }
-
-    public Board() {
-        this.cells = new ArrayList<>();
-
-        int row = 0;
-        int col = 0;
-        for (int i = 0; i <= 81; i++) {
-            cells.add(new Cell(row, col));
-
-            col++;
-
-            if (i % 9 == 0 && i != 0) {
-                row++;
-                col = 0;
-            }
-        }
     }
 
     public List<Cell> getCells() {
