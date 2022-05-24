@@ -1,8 +1,12 @@
 package tech.longwell.soduko;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.Log;
+import android.view.View;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,10 +14,36 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class Board {
+public class Board extends Drawable {
     private List<Cell> cells;
 
+    private Paint backgroundPaint;
+    private Paint gridPaint;
+    private Paint gridSquarePaint;
+
     public Board() {
+        super();
+
+        // the base background color
+        backgroundPaint = new Paint();
+        backgroundPaint.setAntiAlias(true);
+        backgroundPaint.setColor(Color.rgb(25, 25, 25));
+        backgroundPaint.setStyle(Paint.Style.FILL);
+
+        // the small grid lines
+        gridPaint = new Paint();
+        gridPaint.setAntiAlias(true);
+        gridPaint.setColor(Color.rgb(69, 69, 69));
+        gridPaint.setStyle(Paint.Style.STROKE);
+
+        // the big grid lines
+        gridSquarePaint = new Paint();
+        gridSquarePaint.setAntiAlias(true);
+        gridSquarePaint.setColor(Color.rgb(102, 102, 102));
+        gridSquarePaint.setStyle(Paint.Style.STROKE);
+        gridSquarePaint.setStrokeWidth(5);
+
+        // build the puzzle
         this.cells = new ArrayList<>();
 
         int row = 0;
@@ -28,6 +58,45 @@ public class Board {
                 col = 0;
             }
         }
+    }
+
+    void drawBackground(Canvas canvas) {
+        canvas.drawRect(getBounds(), backgroundPaint);
+    }
+
+    void drawCells(Canvas canvas) {
+        for (Cell cell : cells) {
+            cell.draw(canvas);
+        }
+    }
+
+    void drawGridLines(Canvas canvas) {
+        final float colWidth = getWidth() / 9;
+        final float colHeight = getHeight() / 9;
+
+        for (int i = 0; i < 10; i++) {
+            final Paint linePaint = i % 3 == 0 && i != 0 && i != 9 ? gridSquarePaint : gridPaint;
+            canvas.drawLine(i * colWidth, 0, i * colWidth, getWidth(), linePaint);
+            canvas.drawLine(0, i * colHeight, getWidth(), i * colHeight, linePaint);
+        }
+    }
+
+    @Override
+    public void resize(View view) {
+        setBounds(new Rect(0, 0, view.getWidth(), view.getWidth()));
+
+        for (Cell cell : cells) {
+            cell.resize(view);
+        }
+    }
+
+    @Override
+    void draw(Canvas canvas) {
+        // draw the background
+        drawBackground(canvas);
+        drawCells(canvas);
+//        drawHighlights();
+        drawGridLines(canvas);
     }
 
     public List<Cell> getCellsInSquare(int square) {
