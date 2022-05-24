@@ -48,12 +48,13 @@ public class Board extends Drawable {
 
         int row = 0;
         int col = 0;
-        for (int i = 0; i <= 81; i++) {
+        for (int i = 0; i < 81; i++) {
             cells.add(new Cell(row, col));
+            Log.d("CELLMADE", String.valueOf(row) + ", " + String.valueOf(col));
 
             col++;
 
-            if (i % 9 == 0 && i != 0) {
+            if ((i + 1) % 9 == 0 && i != 0) {
                 row++;
                 col = 0;
             }
@@ -92,10 +93,32 @@ public class Board extends Drawable {
 
     @Override
     void draw(Canvas canvas) {
-        // draw the background
+        Optional<Cell> selectedCell = getCells().stream().filter(cell -> cell.isSelected()).findFirst();
+        getCells().stream().forEach(cell -> {
+                cell.setHighlighted(selectedCell.isPresent() && (
+                    selectedCell.get().getRow() == cell.getRow()
+                    || selectedCell.get().getCol() == cell.getCol()
+                    || selectedCell.get().getSquare() == cell.getSquare()
+                ));
+
+                cell.setMatching(selectedCell.flatMap(selCell -> selCell.getNum()).orElse(-1) == cell.getNum().orElse(-2));
+
+                cell.getPotentials().forEach(potential -> {
+                    potential.setMatching(selectedCell.flatMap(selCell -> selCell.getNum()).orElse(-1) == potential.getNum());
+                });
+            }
+        );
+
+//        getCells().stream().filter(cell -> cell.isSelected()).findFirst().ifPresent(selectedCell -> {
+//
+//                getCellsInRow(selectedCell.getRow()).forEach(rowCell -> rowCell.setHighlighted(true));
+//                getCellsInCol(selectedCell.getCol()).forEach(colCell -> colCell.setHighlighted(true));
+//                getCellsInSquare(selectedCell.getSquare()).forEach(squareCell -> squareCell.setHighlighted(true));
+//            }
+//        );
+
         drawBackground(canvas);
         drawCells(canvas);
-//        drawHighlights();
         drawGridLines(canvas);
     }
 
@@ -116,6 +139,7 @@ public class Board extends Drawable {
     }
 
     public int getSquare(int row, int col) {
+        Log.d("WUT", String.valueOf(row) + ", " + String.valueOf(col));
         if (row <= 2) {
             if (col <= 2) return 0;
             else if (col <= 5) return 1;

@@ -47,14 +47,6 @@ public class GameView extends View {
         buttonTextPaint.setTextSize(70);
         buttonTextPaint.setTextAlign(Paint.Align.CENTER);
 
-        // cell highlighting
-        connectedHighlightPaint = new Paint();
-        connectedHighlightPaint.setAntiAlias(true);
-        connectedHighlightPaint.setColor(Color.rgb(24, 33, 24));
-        connectedHighlightPaint.setStyle(Paint.Style.FILL);
-
-
-
         tapPoint = new Point(-1, -1);
         this.board = new Board();
     }
@@ -69,9 +61,17 @@ public class GameView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        // update tapped cell
+        for (Cell cell : board.getCells()) {
+            if (cell.getBounds().contains(tapPoint.x, tapPoint.y))
+                cell.setSelected(true);
+            else
+                cell.setSelected(false);
+        }
+
         board.draw(canvas);
-        drawButtons(canvas);
-//        drawCells(canvas);
+//        drawButtons(canvas);
     }
 
     @Override
@@ -114,56 +114,14 @@ public class GameView extends View {
         }
     }
 
-
-    private void drawHighlights(Canvas canvas) {
-        if (tapPoint.x >= 0 && tapPoint.y >= 0 && tapPoint.x <= canvas.getWidth() && tapPoint.y <= canvas.getWidth()) {
-            Log.d("YO", "tapped board");
-
-            List<Integer> coords = board.convertCanvasPixelsToCoords(canvas, tapPoint.x, tapPoint.y);
-            int focusedRow = coords.get(0);
-            int focusedCol = coords.get(1);
-
-            canvas.drawRect(board.getRowRect(canvas, focusedRow), connectedHighlightPaint);
-            canvas.drawRect(board.getColRect(canvas, focusedCol), connectedHighlightPaint);
-            canvas.drawRect(board.getSquareRect(canvas, board.getSquare(focusedRow, focusedCol)), connectedHighlightPaint);
-        }
-    }
-
-    private Optional<Cell> getTappedCell(Canvas canvas) {
-        Optional<Cell> tappedCell = Optional.empty();
-
-        if (tapPoint.x >= 0 && tapPoint.x <= canvas.getWidth() && tapPoint.y >= 0 && tapPoint.y <= canvas.getWidth()) {
-            List<Integer> coords = board.convertCanvasPixelsToCoords(canvas, tapPoint.x, tapPoint.y);
-            tappedCell = Optional.of(board.getCell(coords.get(0), coords.get(1)));
-        }
-
-        return tappedCell;
-    }
-
-//    private void drawCells(Canvas canvas) {
-//        for (Cell cell : board.getCells()) {
-//            if (cell.getNum().isPresent()) {
-//                List<Float> coords = cell.getCenterOnCanvas(canvas);
-//                Paint paint = getTappedCell(canvas).map(Cell::getNum).orElse(Optional.of(-1)).orElse(-1) == cell.getNum().orElse(-2)
-//                    ? numPaintHighlighted
-//                    : numPaint;
+//    private Optional<Cell> getTappedCell(Canvas canvas) {
+//        Optional<Cell> tappedCell = Optional.empty();
 //
-//                float x = coords.get(0);
-//                float y = coords.get(1) - ((paint.descent() + paint.ascent()) / 2);
-//                canvas.drawText(cell.getNum().get().toString(), x, y, paint);
-//            } else {
-//                for (int penciledNum : cell.getPenciledNums()) {
-//                    List<Float> penciledCoords = cell.getPenciledNumCenterOnCanvas(canvas, penciledNum);
-//
-//                    Paint paint = getTappedCell(canvas).map(Cell::getNum).orElse(Optional.of(-1)).orElse(-1) == penciledNum
-//                            ? pencilPaintHighlighted
-//                            : pencilPaint;
-//
-//                    float penciledX = penciledCoords.get(0);
-//                    float penciledY = penciledCoords.get(1) - ((paint.descent() + paint.ascent()) / 2);
-//                    canvas.drawText(String.valueOf(penciledNum), penciledX, penciledY, paint);
-//                }
-//            }
+//        if (tapPoint.x >= 0 && tapPoint.x <= canvas.getWidth() && tapPoint.y >= 0 && tapPoint.y <= canvas.getWidth()) {
+//            List<Integer> coords = board.convertCanvasPixelsToCoords(canvas, tapPoint.x, tapPoint.y);
+//            tappedCell = Optional.of(board.getCell(coords.get(0), coords.get(1)));
 //        }
+//
+//        return tappedCell;
 //    }
 }
